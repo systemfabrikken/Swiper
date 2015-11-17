@@ -1147,7 +1147,10 @@ s.updateClickedSlide = function (e) {
 
     if (slide && slideFound) {
         s.clickedSlide = slide;
-        s.clickedIndex = $(slide).index();
+        //s.clickedIndex = $(slide).index();
+        for (var i = 0; i < s.slides.length; i++) {
+            if (s.slides[i] === slide) s.clickedIndex = i;
+        }
     }
     else {
         s.clickedSlide = undefined;

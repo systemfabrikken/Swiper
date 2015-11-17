@@ -10,7 +10,7 @@
  * 
  * Licensed under MIT
  * 
- * Released on: November 7, 2015
+ * Released on: November 17, 2015
  */
 (function (root, factory) {
 	'use strict';
@@ -276,11 +276,19 @@
             //Get breakpoint for window width
             if (!s.params.breakpoints) return false;
             var breakpoint = false;
-            for ( var point in s.params.breakpoints ) {
+            var points = [], point;
+            for ( point in s.params.breakpoints ) {
                 if (s.params.breakpoints.hasOwnProperty(point)) {
-                    if (point >= $(window).width() && !breakpoint) {
-                        breakpoint = point;
-                    }
+                    points.push(point);
+                }
+            }
+            points.sort(function (a, b) {
+                return parseInt(a, 10) > parseInt(b, 10);
+            });
+            for (var i = 0; i < points.length; i++) {
+                point = points[i];
+                if (point >= $(window).width() && !breakpoint) {
+                    breakpoint = point;
                 }
             }
             return breakpoint || 'max';
@@ -812,6 +820,8 @@
                 translate = s.translate || 0;
             }
             var translatesDiff = s.maxTranslate() - s.minTranslate();
+            var wasBeginning = s.isBeginning;
+            var wasEnd = s.isEnd;
             if (translatesDiff === 0) {
                 s.progress = 0;
                 s.isBeginning = s.isEnd = true;
@@ -821,8 +831,8 @@
                 s.isBeginning = s.progress <= 0;
                 s.isEnd = s.progress >= 1;
             }
-            if (s.isBeginning) s.emit('onReachBeginning', s);
-            if (s.isEnd) s.emit('onReachEnd', s);
+            if (s.isBeginning && !wasBeginning) s.emit('onReachBeginning', s);
+            if (s.isEnd && !wasEnd) s.emit('onReachEnd', s);
         
             if (s.params.watchSlidesProgress) s.updateSlidesProgress(translate);
             s.emit('onProgress', s, s.progress);
@@ -1175,7 +1185,10 @@
         
             if (slide && slideFound) {
                 s.clickedSlide = slide;
-                s.clickedIndex = $(slide).index();
+                //s.clickedIndex = $(slide).index();
+                for (var i = 0; i < s.slides.length; i++) {
+                    if (s.slides[i] === slide) s.clickedIndex = i;
+                }
             }
             else {
                 s.clickedSlide = undefined;
